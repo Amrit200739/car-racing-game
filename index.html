@@ -3,10 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Racing Game</title>
-    <script src="index.js" defer></script>
+    <title>3D Racing Game</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: Arial, sans-serif; background-color: black; color: white; text-align: center; }
+        #dashboard {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('gameplay_background.jpg') no-repeat center center;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        #playButton {
+            font-size: 30px;
+            padding: 15px 30px;
+            background: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+        #speedometer, #position, #countdown, #pauseBtn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #position { left: auto; right: 20px; }
+        #countdown { top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 50px; display: none; }
+        #pauseBtn { bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 20px; cursor: pointer; }
+        canvas { display: none; }
+    </style>
 </head>
 <body>
-    <h1>Loading the game...</h1>
+    <div id="dashboard">
+        <h1>3D Racing Game</h1>
+        <button id="playButton">Play</button>
+    </div>
+    <div id="gameContainer" style="display: none;">
+        <div id="speedometer">Speed: 0</div>
+        <div id="position">Position: 3rd</div>
+        <div id="countdown"></div>
+        <button id="pauseBtn">Pause</button>
+        <canvas id="gameCanvas"></canvas>
+    </div>
+    
+    <script>
+        let gamePaused = false;
+        const countdownElement = document.getElementById("countdown");
+        const pauseButton = document.getElementById("pauseBtn");
+        const dashboard = document.getElementById("dashboard");
+        const gameContainer = document.getElementById("gameContainer");
+        const playButton = document.getElementById("playButton");
+
+        playButton.addEventListener("click", () => {
+            dashboard.style.display = "none";
+            gameContainer.style.display = "block";
+            startCountdown(() => { console.log("Game Start!"); });
+        });
+
+        function startCountdown(callback) {
+            let count = 3;
+            countdownElement.style.display = "block";
+            countdownElement.innerText = count;
+            let interval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownElement.innerText = count;
+                } else {
+                    countdownElement.innerText = "GO!";
+                    setTimeout(() => { countdownElement.style.display = "none"; callback(); }, 1000);
+                    clearInterval(interval);
+                }
+            }, 1000);
+        }
+
+        pauseButton.addEventListener("click", () => {
+            gamePaused = !gamePaused;
+            pauseButton.innerText = gamePaused ? "Resume" : "Pause";
+        });
+
+        function addFinishLine() {
+            const finishLine = document.createElement("div");
+            finishLine.style.position = "absolute";
+            finishLine.style.bottom = "50px";
+            finishLine.style.left = "50%";
+            finishLine.style.transform = "translateX(-50%)";
+            finishLine.style.width = "200px";
+            finishLine.style.height = "10px";
+            finishLine.style.background = "white";
+            finishLine.style.border = "5px solid black";
+            document.body.appendChild(finishLine);
+        }
+
+        function addObstacles() {
+            for (let i = 0; i < 5; i++) {
+                let obstacle = document.createElement("div");
+                obstacle.style.position = "absolute";
+                obstacle.style.width = "30px";
+                obstacle.style.height = "30px";
+                obstacle.style.background = "gray";
+                obstacle.style.borderRadius = "50%";
+                obstacle.style.top = Math.random() * window.innerHeight + "px";
+                obstacle.style.left = Math.random() * window.innerWidth + "px";
+                document.body.appendChild(obstacle);
+            }
+        }
+
+        function updateAICars() {
+            document.querySelectorAll(".aiCar").forEach(car => {
+                let carX = parseInt(car.style.left);
+                let carY = parseInt(car.style.top);
+                let playerX = parseInt(document.getElementById("playerCar").style.left);
+                let playerY = parseInt(document.getElementById("playerCar").style.top);
+
+                let dx = playerX - carX;
+                let dy = playerY - carY;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 100) {
+                    car.style.left = carX - dx / Math.abs(dx) * 10 + "px";
+                    car.style.top = carY - dy / Math.abs(dy) * 10 + "px";
+                }
+            });
+        }
+
+        function gameLoop() {
+            if (!gamePaused) {
+                updateAICars();
+            }
+            requestAnimationFrame(gameLoop);
+        }
+        
+        addFinishLine();
+        addObstacles();
+        gameLoop();
+    </script>
 </body>
 </html>
+
+7749941555
