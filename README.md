@@ -17,4 +17,4 @@ A 3D racing game built using **Three.js** and **JavaScript**.
 ## 🛠️ Installation
 1. Clone the repository:
    ```sh
-   git clone https://github.com/yourusername/racing-game.git
+   git clone https://github.com/Amrit200739/car-racing-game.git
